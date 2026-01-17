@@ -42,7 +42,7 @@ http://localhost:1880
 
 ## 📷 Foto do Resultado
 
-![Resultado do processamento no Node-RED](resultado.png)
+![Resultado do processamento no Node-RED](resultado.jpge)
 
 ## Observações
 
