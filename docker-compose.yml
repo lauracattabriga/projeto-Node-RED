@@ -1,0 +1,15 @@
+services:
+  node-red:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "1880:1880"
+    volumes:
+      - ./data:/data
+    networks:
+      - node-red-net
+    restart: unless-stopped
+
+networks:
+  node-red-net:

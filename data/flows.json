@@ -1,0 +1,182 @@
+[
+    {
+        "id": "37f806c693661043",
+        "type": "tab",
+        "label": "Fluxo 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "2d41792012a7c3eb",
+        "type": "tab",
+        "label": "Fluxo 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a15f151c5c38855f",
+        "type": "inject",
+        "z": "37f806c693661043",
+        "name": "Entrada",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"pedidos\":[{\"id\":1,\"valor\":500,\"cliente_inadimplente\":false,\"urgente\":false},{\"id\":2,\"valor\":1500,\"cliente_inadimplente\":false,\"urgente\":true},{\"id\":3,\"valor\":12000,\"cliente_inadimplente\":true,\"urgente\":false},{\"id\":4,\"valor\":8000,\"cliente_inadimplente\":false,\"urgente\":false}]}",
+        "payloadType": "json",
+        "x": 130,
+        "y": 260,
+        "wires": [
+            [
+                "4a656e3f0e485658"
+            ]
+        ]
+    },
+    {
+        "id": "4a656e3f0e485658",
+        "type": "function",
+        "z": "37f806c693661043",
+        "name": "Processamento",
+        "func": "/* Função responsável por processar os pedidos conforme regras de negócio.\nPedidos urgentes são sinalizados no payload (campo \"urgente\").\nA ordenação não é aplicada para manter a ordem original de entrada, conforme comportamento apresentado no exemplo do desafio.\nCaso necessário, a priorização pode ser implementada via ordenação ou separação de fluxos.*/\n\nlet pedidos = msg.payload.pedidos;\nlet pedidosProcessados = [];\n\nfor (let i = 0; i < pedidos.length; i++) {\n    let pedido = pedidos[i];\n    // Regra de inadimplência (prioridade máxima)\n    if (pedido.cliente_inadimplente) {\n        pedido.decisao = \"BLOQUEADO\";\n    }\n    // Regras baseadas no valor do pedido\n    else if (pedido.valor < 1000) {\n        pedido.decisao = \"APROVADO AUTOMATICAMENTE\";\n    }\n    else if (pedido.valor <= 10000){\n        pedido.decisao = \"ENVIAR PARA GERENTE\";\n    }\n    else {\n        pedido.decisao = \"ENVIAR PARA DIRETORIA\"\n    }\n\n    pedidosProcessados.push(pedido);\n}\n\n/* Exemplo de ordenação por urgência (não aplicada neste desafio):\n    pedidosProcessados.sort((a, b) => a.urgente === b.urgente ? 0 : a.urgente ? -1 : 1); */\n\n// Retorna a lista processada mantendo a ordem original\nmsg.payload = pedidosProcessados\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 260,
+        "wires": [
+            [
+                "843b65da8f6c93f4"
+            ]
+        ]
+    },
+    {
+        "id": "aabe6f18a918b18e",
+        "type": "debug",
+        "z": "37f806c693661043",
+        "name": "Debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 890,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "843b65da8f6c93f4",
+        "type": "function",
+        "z": "37f806c693661043",
+        "name": "Formatação",
+        "func": "let resultado = \"Processamento concluído:\\n\";\n\nfor (let i = 0; i < msg.payload.length; i++) {\n    let pedido = msg.payload[i];\n    let motivo = \"\";\n\n    if (pedido.cliente_inadimplente) {\n        motivo = \"Cliente inadimplente\";\n    }\n    else if (pedido.valor < 1000) {\n        motivo = \"Valor < 1000\";\n    }\n    else if (pedido.valor <= 10000) {\n        motivo = \"Valor entre 1000 e 10000\";\n    }\n    else {\n        motivo = \"Valor > 10000\";\n    }\n\n    if (pedido.urgente) {\n        motivo += \" | Prioridade: URGENTE\";\n    }\n\nresultado += `\n        ---------------------------------\n        Pedido ID: ${pedido.id}\n        Valor: ${pedido.valor} | Inadimplente: ${pedido.cliente_inadimplente} | Urgente: ${pedido.urgente}\n        Decisão: ${pedido.decisao}\n        Motivo: ${motivo}\n\n`;\n}\n\nmsg.payload = resultado;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 260,
+        "wires": [
+            [
+                "aabe6f18a918b18e"
+            ]
+        ]
+    },
+    {
+        "id": "f7251a72f78013e3",
+        "type": "inject",
+        "z": "2d41792012a7c3eb",
+        "name": "Entrada",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"pedidos\":[{\"id\":1,\"valor\":500,\"cliente_inadimplente\":false,\"urgente\":false},{\"id\":2,\"valor\":1500,\"cliente_inadimplente\":false,\"urgente\":true},{\"id\":3,\"valor\":12000,\"cliente_inadimplente\":true,\"urgente\":false},{\"id\":4,\"valor\":8000,\"cliente_inadimplente\":false,\"urgente\":false}]}",
+        "payloadType": "json",
+        "x": 130,
+        "y": 260,
+        "wires": [
+            [
+                "3dab66615d83137d"
+            ]
+        ]
+    },
+    {
+        "id": "3dab66615d83137d",
+        "type": "function",
+        "z": "2d41792012a7c3eb",
+        "name": "Processamento",
+        "func": "/* Função responsável por processar os pedidos conforme regras de negócio.\nPedidos urgentes são sinalizados no payload (campo \"urgente\").\nA ordenação não é aplicada para manter a ordem original de entrada, conforme comportamento apresentado no exemplo do desafio.\nCaso necessário, a priorização pode ser implementada via ordenação ou separação de fluxos.*/\n\nlet pedidos = msg.payload.pedidos;\nlet pedidosProcessados = [];\n\nfor (let i = 0; i < pedidos.length; i++) {\n    let pedido = pedidos[i];\n    // Regra de inadimplência (prioridade máxima)\n    if (pedido.cliente_inadimplente) {\n        pedido.decisao = \"BLOQUEADO\";\n    }\n    // Regras baseadas no valor do pedido\n    else if (pedido.valor < 1000) {\n        pedido.decisao = \"APROVADO AUTOMATICAMENTE\";\n    }\n    else if (pedido.valor <= 10000){\n        pedido.decisao = \"ENVIAR PARA GERENTE\";\n    }\n    else {\n        pedido.decisao = \"ENVIAR PARA DIRETORIA\"\n    }\n\n    pedidosProcessados.push(pedido);\n}\n\n/* Exemplo de ordenação por urgência (não aplicada neste desafio):\n    pedidosProcessados.sort((a, b) => a.urgente === b.urgente ? 0 : a.urgente ? -1 : 1); */\n\n// Retorna a lista processada mantendo a ordem original\nmsg.payload = pedidosProcessados\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 260,
+        "wires": [
+            [
+                "a0529fa80c5e3d9c"
+            ]
+        ]
+    },
+    {
+        "id": "60ee53aa238fc49c",
+        "type": "debug",
+        "z": "2d41792012a7c3eb",
+        "name": "Debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 890,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "a0529fa80c5e3d9c",
+        "type": "function",
+        "z": "2d41792012a7c3eb",
+        "name": "Formatação",
+        "func": "let resultado = \"Processamento concluído:\\n\";\n\nfor (let i = 0; i < msg.payload.length; i++) {\n    let pedido = msg.payload[i];\n    let motivo = \"\";\n\n    if (pedido.cliente_inadimplente) {\n        motivo = \"Cliente inadimplente\";\n    }\n    else if (pedido.valor < 1000) {\n        motivo = \"Valor < 1000\";\n    }\n    else if (pedido.valor <= 10000) {\n        motivo = \"Valor entre 1000 e 10000\";\n    }\n    else {\n        motivo = \"Valor > 10000\";\n    }\n\n    if (pedido.urgente) {\n        motivo += \" | Prioridade: URGENTE\";\n    }\n\nresultado += `\n        ---------------------------------\n        Pedido ID: ${pedido.id}\n        Valor: ${pedido.valor} | Inadimplente: ${pedido.cliente_inadimplente} | Urgente: ${pedido.urgente}\n        Decisão: ${pedido.decisao}\n        Motivo: ${motivo}\n\n`;\n}\n\nmsg.payload = resultado;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 260,
+        "wires": [
+            [
+                "60ee53aa238fc49c"
+            ]
+        ]
+    }
+]
